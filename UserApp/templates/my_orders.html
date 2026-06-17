@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>My Orders | Smart Canteen</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="{% static 'web/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'web/css/style.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .btn-cancel-user {
+            background-color: #fff5f5;
+            color: #e53e3e;
+            border: 1px solid #feb2b2;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 50px;
+            transition: all 0.2s ease;
+        }
+        .btn-cancel-user:hover {
+            background-color: #e53e3e;
+            color: #ffffff;
+            border-color: #e53e3e;
+            transform: translateY(-1px);
+        }
+        .ticket {
+            border-left: 5px dashed #FEA116;
+            background: #fff;
+            border-radius: 10px;
+        }
+        .status-badge { font-size: 0.8rem; padding: 5px 12px; border-radius: 20px; }
+
+        .status-pending { background-color: #ffc107; color: #000; }   /* Yellow */
+        .status-confirmed { background-color: #17a2b8; color: #fff; } /* Cyan */
+        .status-delivered { background-color: #28a745; color: #fff; } /* Green */
+        .status-cancelled { background-color: #dc3545; color: #fff; } /* Red */
+        .status-preparing {
+            background-color: #fd7e14; /* Orange */
+            color: #fff;
+            font-weight: bold;
+        }
+        .ticket-header { border-bottom: 1px dashed #ddd; padding-bottom: 10px; margin-bottom: 10px; }
+        .item-list { font-size: 0.9rem; color: #555; }
+    </style>
+</head>
+
+<body>
+    <div class="container-xxl bg-white p-0">
+        <div class="container-xxl py-5 bg-dark hero-header mb-5">
+            <div class="container text-center my-5 pt-5 pb-4">
+                <h1 class="display-3 text-white mb-3 animated slideInDown">My Orders</h1>
+            </div>
+        </div>
+        <div class="container mt-3">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <strong>{{ message }}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-6 border-end">
+                    <h3 class="mb-4 text-primary ff-secondary"><i class="fa fa-utensils me-2"></i> Food Orders</h3>
+                    {% for order in checkouts %}
+                    <div class="ticket shadow-sm p-4 mb-4">
+                        <div class="ticket-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0 text-dark">Order ID: #{{ order.id }}</h5>
+                                <small class="text-muted">Token Generated</small>
+                            </div>
+                            <span class="badge status-badge
+                                {% if order.status == 'Pending' %}status-pending
+                                {% elif order.status == 'Confirmed' %}status-confirmed
+                                {% elif order.status == 'Preparing' %}status-preparing
+                                {% elif order.status == 'Delivered' %}status-delivered
+                                {% elif order.status == 'Cancelled' %}status-cancelled
+                                {% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="item-list">
+                                <strong>Items:</strong>
+                                <ul class="list-unstyled mb-2">
+                                    {% for item in order.items.all %}
+                                        <li>{{ item.food.food_name }} (x{{ item.quantity }})</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="d-flex justify-content-between small">
+                                <span><i class="fa fa-clock me-1"></i> Pickup Time: <strong>{{ order.order_time }}</strong></span>
+                                <span>Date: {{ order.order_date }}</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <h5 class="text-primary mb-0">₹{{ order.total_amount }}</h5>
+
+                            {% if order.status == 'Pending' or order.status == 'Confirmed' %}
+                                <form action="{% url 'cancel_order' order.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-cancel-user">Cancel Order</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-lg-6">
+                    <h3 class="mb-4 text-warning ff-secondary"><i class="fa fa-calendar-alt me-2"></i> Table Reservations</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover border">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Reservation Details</th>
+                                    <th>Guests</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ booking.date_time|date:"D, d M Y" }}</div>
+                                        <small class="text-muted">{{ booking.date_time|time:"h:i A" }}</small>
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="badge bg-light text-dark border px-3">{{ booking.people }} People</span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="d-flex flex-column align-items-start">
+                                            {% if booking.status == 'Pending' %}
+                                                <span class="badge bg-secondary mb-2">Pending</span>
+                                            {% elif booking.status == 'Confirmed' %}
+                                                <span class="badge bg-warning text-dark mb-2">Confirmed</span>
+                                            {% elif booking.status == 'Completed' %}
+                                                <span class="badge bg-success mb-2">Completed</span>
+                                            {% elif booking.status == 'Cancelled' %}
+                                                <span class="badge bg-danger mb-2">Cancelled</span>
+                                            {% endif %}
+
+                                            {% if booking.status == 'Pending' or booking.status == 'Confirmed' %}
+                                                <form action="{% url 'user_cancel_booking' booking.id %}" method="POST"
+                                                      onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-cancel-user">Cancel</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-5 text-muted">No table bookings found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    function confirmUserCancel(bookingId) {
+        Swal.fire({
+            title: 'Cancel Reservation?',
+            text: "Are you sure?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#FEA116',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                // This must match your urls.py path exactly
+                form.action = `/user-cancel-booking/${bookingId}/`;
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = 'csrfmiddlewaretoken';
+                csrfToken.value = '{{ csrf_token }}';
+                form.appendChild(csrfToken);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+    </script>
+</body>
+</html>

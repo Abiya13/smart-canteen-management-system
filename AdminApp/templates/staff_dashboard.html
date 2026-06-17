@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Manage Availability - Smart Canteen</title>
+
+    <link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar" class="sidebar js-sidebar">
+            <div class="sidebar-content js-simplebar">
+                <a class="sidebar-brand" href="{% url 'staff_dashboard' %}">
+                    <span class="align-middle">Smart Canteen</span>
+                </a>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-header">Operations</li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'staff_dashboard' %}">
+                            <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'live_orders' %}">
+                            <i class="align-middle" data-feather="play-circle"></i> <span class="align-middle">Live Orders</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </nav>
+
+        <div class="main">
+            <nav class="navbar navbar-expand navbar-light navbar-bg">
+                <a class="sidebar-toggle js-sidebar-toggle">
+                    <i class="hamburger align-self-center"></i>
+                </a>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav navbar-align">
+                        <li class="nav-item me-2">
+                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3 mt-1" href="{% url 'user_home' %}" target="_blank">
+                                <i class="align-middle me-1" data-feather="external-link"></i> View Site
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
+                                <span class="text-dark">Welcome, <strong>{{ request.user.username }}</strong></span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a class="dropdown-item text-danger" href="{% url 'logout_admin' %}">Log out</a>
+                            </div>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'staff_reservations' %}">
+                                <i class="align-middle" data-feather="calendar"></i> <span class="align-middle">Table Bookings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="content">
+                <div class="container-fluid p-0">
+                    <h1 class="h3 mb-3">Today's <strong>Menu Availability</strong></h1>
+                    <p class="text-muted">Turn items ON or OFF based on current kitchen stock.</p>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <table class="table table-hover my-0">
+                                <thead>
+                                    <tr>
+                                        <th>Food Image</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Current Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for f in foods %}
+                                    <tr>
+                                        <td><img src="{{ f.food_image.url }}" width="50" class="rounded shadow-sm"></td>
+                                        <td><strong>{{ f.food_name }}</strong></td>
+                                        <td><span class="badge bg-light text-dark border">{{ f.category.category_name }}</span></td>
+                                        <td>₹{{ f.price }}</td>
+                                        <td>
+                                            {% if f.availability == "Available" %}
+                                                <span class="badge bg-success">In Stock</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Sold Out</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            {% if f.availability == "Available" %}
+                                                <a href="{% url 'toggle_availability' f.id 'Not Available' %}" class="btn btn-outline-danger btn-sm">
+                                                    Mark Sold Out
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'toggle_availability' f.id 'Available' %}" class="btn btn-success btn-sm">
+                                                    Mark In Stock
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="{% static 'assets/js/app.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof feather !== 'undefined') { feather.replace(); }
+
+            {% if messages %}
+                {% for message in messages %}
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated',
+                    text: '{{ message }}',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

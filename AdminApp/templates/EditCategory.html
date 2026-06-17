@@ -1,0 +1,79 @@
+{% extends 'Dashboard.html' %}
+{% block content %}
+
+<!-- GAP BETWEEN NAVBAR & FORM -->
+<div class="container-fluid mt-4">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-md-12">
+
+      <div class="card">
+        <div class="card-body">
+
+          <h4 class="card-title">Edit Category</h4>
+          <p class="card-description">Update category details</p>
+
+          <form method="POST"
+                action="{% url 'update_category' c_id=category.id %}"
+                enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <!-- Category Name -->
+            <div class="form-group mb-3">
+              <label>Category Name</label>
+              <input type="text"
+                     name="category_name"
+                     class="form-control"
+                     value="{{ category.category_name }}"
+                     required>
+            </div>
+
+            <!-- Existing Image -->
+            <div class="form-group mb-3">
+              <label>Current Image</label><br>
+              {% if category.category_image %}
+                <img src="{{ category.category_image.url }}"
+                     alt="Category Image"
+                     style="height:80px; border-radius:6px;">
+              {% else %}
+                <p class="text-muted">No image uploaded</p>
+              {% endif %}
+            </div>
+
+            <!-- New Image -->
+            <div class="form-group mb-3">
+              <label>Change Image</label>
+              <input type="file"
+                     name="category_image"
+                     class="form-control">
+            </div>
+
+            <!-- Description -->
+            <div class="form-group mb-4">
+              <label>Description</label>
+              <textarea name="description"
+                        class="form-control"
+                        rows="4">{{ category.description }}</textarea>
+            </div>
+
+            <!-- Buttons -->
+            <button type="submit" class="btn btn-primary me-2">
+              Update Category
+            </button>
+
+            <a href="{% url 'view_category' %}" class="btn btn-light">
+              Cancel
+            </a>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

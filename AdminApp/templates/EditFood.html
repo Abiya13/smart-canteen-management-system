@@ -1,0 +1,103 @@
+{% extends 'Dashboard.html' %}
+{% block content %}
+
+<div class="row justify-content-center mt-4">
+  <div class="col-lg-10 col-md-12">
+
+    <div class="card">
+      <div class="card-body">
+
+        <h4 class="card-title">Edit Food</h4>
+        <p class="card-description">Update food details</p>
+
+        <form method="POST"
+              action="{% url 'update_food' food_id=food.id %}"
+              enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- Category -->
+          <div class="form-group mb-3">
+            <label>Category</label>
+            <select name="category" class="form-control" required>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}"
+                {% if food.category.id == cat.id %}selected{% endif %}>
+                {{ cat.category_name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Food Name -->
+          <div class="form-group mb-3">
+            <label>Food Name</label>
+            <input type="text"
+                   name="food_name"
+                   value="{{ food.food_name }}"
+                   class="form-control"
+                   required>
+          </div>
+
+          <!-- Price -->
+          <div class="form-group mb-3">
+            <label>Price</label>
+            <input type="number"
+                   step="0.01"
+                   name="price"
+                   value="{{ food.price }}"
+                   class="form-control"
+                   required>
+          </div>
+
+
+          <!-- Availability -->
+          <div class="form-group mb-3">
+            <label>Availability</label>
+            <select name="availability" class="form-control">
+              <option value="Available"
+                {% if food.availability == "Available" %}selected{% endif %}>
+                Available
+              </option>
+              <option value="Out of Stock"
+                {% if food.availability == "Out of Stock" %}selected{% endif %}>
+                Out of Stock
+              </option>
+            </select>
+          </div>
+
+          <!-- Food Image -->
+          <div class="form-group mb-3">
+            <label>Food Image</label>
+            <input type="file" name="food_image" class="form-control">
+            {% if food.food_image %}
+              <img src="{{ food.food_image.url }}"
+                   class="mt-2 rounded"
+                   width="120">
+            {% endif %}
+          </div>
+
+          <!-- Description -->
+          <div class="form-group mb-4">
+            <label>Description</label>
+            <textarea name="description"
+                      rows="4"
+                      class="form-control">{{ food.description }}</textarea>
+          </div>
+          <!-- Buttons -->
+          <button type="submit" class="btn btn-primary me-2">
+            Update Food
+          </button>
+
+          <a href="{% url 'view_food' %}" class="btn btn-light">
+            Cancel
+          </a>
+
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

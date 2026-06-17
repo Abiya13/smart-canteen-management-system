@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Checkout | Smart Canteen</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="{% static 'web/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'web/css/style.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container-xxl bg-white p-0">
+    <div class="container-xxl bg-dark hero-header mb-5" style="height:120px;">
+        <div class="container text-center pt-4">
+            <h2 class="text-white">Checkout</h2>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="text-center mb-5 wow fadeInUp" data-wow-delay="0.1s">
+            <h5 class="section-title ff-secondary text-center text-primary fw-normal">Smart Canteen</h5>
+            <h1 class="mb-4">Finalize Your Order</h1>
+        </div>
+
+        <div class="row g-5">
+            <div class="col-lg-6">
+                <div class="bg-light rounded p-4 shadow-sm h-100 border">
+                    <h4 class="mb-4 border-bottom pb-2">
+                        <i class="fa fa-shopping-basket text-primary me-2"></i>Order Summary
+                    </h4>
+
+                    <div class="cart-items-list" style="max-height: 400px; overflow-y: auto;">
+                        {% for item in cart_items %}
+                        <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ item.food.food_name }}</h6>
+                                <small class="text-muted">₹{{ item.food.price }} × {{ item.quantity }}</small>
+                            </div>
+                            <strong class="text-dark">₹ {{ item.total_price }}</strong>
+                        </div>
+                        {% empty %}
+                        <p class="text-center py-4">Your cart is empty.</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4 p-3 bg-white rounded border">
+                        <h5 class="mb-0 fw-bold">Grand Total</h5>
+                        <h5 class="text-primary mb-0 fw-bold">₹ {{ total }}</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="bg-light rounded p-4 shadow-sm h-100 border">
+                    <h4 class="mb-4 border-bottom pb-2">
+                        <i class="fa fa-clock text-primary me-2"></i>Pickup Details
+                    </h4>
+
+                    <form id="checkoutForm" method="POST" action="{% url 'save_checkout_data' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="order_now_form">
+                        <input type="hidden" name="total_amount" value="{{ total }}">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label fw-bold small">Customer Name</label>
+                                    <input type="text" name="username" class="form-control border-0 bg-white" value="{{ user_name }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label fw-bold small">Email Address</label>
+                                    <input type="email" name="email" class="form-control border-0 bg-white" value="{{ user_email }}" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group mb-4">
+                                    <label class="form-label fw-bold">Estimated Pickup Time (Today)</label>
+                                    <input type="time" name="order_time" id="pickup_time" class="form-control py-3" required>
+                                    <small class="text-muted"><i class="fa fa-info-circle me-1"></i> Please allow at least 15-20 minutes for preparation.</small>
+                                </div>
+                            </div>
+
+<!--                            <div class="col-12">-->
+<!--                                <div class="alert alert-warning py-2 small">-->
+<!--                                    <strong>Note:</strong> Please show your <strong>Order Token</strong> at the counter after payment.-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-warning w-100 py-3 fw-bold text-uppercase">
+                                    Confirm Order
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const checkoutForm = document.getElementById('checkoutForm');
+
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function(e) {
+            const timeInput = document.getElementById('pickup_time').value;
+
+            if (timeInput) {
+                const [hours, minutes] = timeInput.split(':').map(Number);
+                const selectedTotalMinutes = (hours * 60) + minutes;
+
+                // 08:30 AM = 510 minutes
+                const openMinutes = (8 * 60) + 30;
+                // 08:00 PM = 1200 minutes
+                const closeMinutes = (20 * 60);
+
+                if (selectedTotalMinutes < openMinutes || selectedTotalMinutes > closeMinutes) {
+                    // STOP the form from submitting
+                    e.preventDefault();
+
+                    // Re-enable the button (since your HTML has onsubmit="this.querySelector('button').disabled=true;")
+                    checkoutForm.querySelector('button').disabled = false;
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Canteen is Closed',
+                        html: 'Orders are only accepted between:<br><strong>08:30 AM and 08:00 PM</strong>',
+                        confirmButtonColor: '#FEA116',
+                        iconColor: '#FEA116'
+                    });
+                }
+            }
+        });
+    }
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

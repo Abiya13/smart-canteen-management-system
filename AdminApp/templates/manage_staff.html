@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Staff Manager - Smart Canteen</title>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="shortcut icon" href="{% static 'assets/img/icons/icon-48x48.png' %}" />
+    <link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar" class="sidebar js-sidebar">
+            <div class="sidebar-content js-simplebar">
+                <a class="sidebar-brand" href="{% url 'admin_dashboard' %}">
+                    <span class="align-middle">Smart Canteen</span>
+                </a>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'admin_dashboard' %}">
+                            <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'live_orders' %}">
+                            <i class="align-middle" data-feather="play-circle"></i> <span class="align-middle">Live Orders</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'view_bookings' %}">
+                            <i class="align-middle" data-feather="calendar"></i> <span class="align-middle">Reservations</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item active">
+                        <a class="sidebar-link" href="{% url 'manage_staff' %}">
+                            <i class="align-middle" data-feather="users"></i> <span class="align-middle">Staff Manager</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'view_feedback' %}">
+                            <i class="align-middle" data-feather="message-square"></i> <span class="align-middle">Feedback</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="main">
+            <nav class="navbar navbar-expand navbar-light navbar-bg">
+                <a class="sidebar-toggle js-sidebar-toggle">
+                    <i class="hamburger align-self-center"></i>
+                </a>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav navbar-align">
+                        <li class="nav-item">
+                            <span class="text-dark">Role: <strong>Super Admin</strong></span>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="content">
+                <div class="container-fluid p-0">
+
+                    <h1 class="h3 mb-3"><strong>Staff</strong> Management</h1>
+
+                    <div class="row">
+                        <div class="col-12 col-lg-4">
+                            <div class="card shadow-sm border-top border-primary border-4">
+                                <div class="card-header bg-white pt-4">
+                                    <h5 class="card-title mb-0">Add New Staff</h5>
+                                    <p class="text-muted small">Promote an existing user to staff level.</p>
+                                </div>
+                                <div class="card-body">
+                                    <form method="POST" action="{% url 'manage_staff' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="promote">
+                                        <div class="mb-3">
+                                            <label class="form-label">Select Registered User</label>
+                                            <select name="user_id" class="form-select form-select-lg" required>
+                                                <option value="" selected disabled>Choose user...</option>
+                                                {% for user in regular_users %}
+                                                    <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100 py-2">
+                                            <i class="align-middle me-1" data-feather="user-plus"></i> Grant Access
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-8">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white pt-4 d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">Active Team Members</h5>
+                                    <span class="badge bg-success-light text-success">{{ staff.count }} Members</span>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-hover my-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Staff Member</th>
+                                                <th class="d-none d-md-table-cell">Joined</th>
+                                                <th class="text-end">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for s in staff %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="stat text-primary me-2">
+                                                            <i class="align-middle" data-feather="user"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-bold">{{ s.username }}</div>
+                                                            <div class="text-muted small">{{ s.email }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="d-none d-md-table-cell align-middle">{{ s.date_joined|date:"M d, Y" }}</td>
+                                                <td class="text-end align-middle">
+                                                    <form method="POST" action="{% url 'manage_staff' %}" onsubmit="return confirm('Revoke staff access?')">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="user_id" value="{{ s.id }}">
+                                                        <input type="hidden" name="action" value="demote">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                            <i class="align-middle" data-feather="user-minus"></i> Remove
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row text-muted">
+                        <div class="col-12 text-center">
+                            <p class="mb-0 small text-muted">&copy; 2026 Smart Canteen Access Control</p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="{% static 'assets/js/app.js' %}"></script>
+</body>
+</html>

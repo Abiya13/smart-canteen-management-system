@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Manage Reservations - Smart Canteen</title>
+
+    <link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar" class="sidebar js-sidebar">
+            <div class="sidebar-content js-simplebar">
+                <a class="sidebar-brand" href="{% url 'staff_dashboard' %}">
+                    <span class="align-middle">Smart Canteen</span>
+                </a>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-header">Operations</li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'staff_dashboard' %}">
+                            <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'live_orders' %}">
+                            <i class="align-middle" data-feather="play-circle"></i> <span class="align-middle">Live Orders</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item active">
+                        <a class="sidebar-link" href="{% url 'staff_reservations' %}">
+                            <i class="align-middle" data-feather="calendar"></i> <span class="align-middle">Table Bookings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="main">
+            <nav class="navbar navbar-expand navbar-light navbar-bg">
+                <a class="sidebar-toggle js-sidebar-toggle">
+                    <i class="hamburger align-self-center"></i>
+                </a>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav navbar-align">
+                        <li class="nav-item me-2">
+                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3 mt-1" href="{% url 'user_home' %}" target="_blank">
+                                <i class="align-middle me-1" data-feather="external-link"></i> View Site
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="content">
+                <div class="container-fluid p-0">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <h1 class="h3">Manage <strong>Table Reservations</strong></h1>
+                            <p class="text-muted">Track upcoming bookings and prepare your seating area.</p>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover my-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Table No.</th>
+                                            <th>Customer</th>
+                                            <th>Date & Time</th>
+                                            <th>Guests</th>
+                                            <th>Special Request</th>
+                                            <th class="text-end">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for res in bookings %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                                    Table {{ res.table_number }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong>{{ res.name }}</strong><br>
+                                                <small class="text-muted">{{ res.email }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="text-primary fw-bold">{{ res.date_time|date:"h:i A" }}</span><br>
+                                                <small>{{ res.date_time|date:"d M, Y" }}</small>
+                                            </td>
+                                            <td><i class="bi bi-people me-1"></i> {{ res.people }}</td>
+                                            <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                <small class="text-muted">
+                                                    {{ res.special_request|default:"No special instructions" }}
+                                                </small>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="badge bg-success-light text-success border border-success">
+                                                    Confirmed
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <i class="bi bi-calendar-x d-block mb-2" style="font-size: 2rem;"></i>
+                                                No reservations found for today.
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row text-muted">
+                        <div class="col-12 text-center">
+                            <p class="mb-0">
+                                &copy; 2026 - <strong>Smart Canteen Management System</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="{% static 'assets/js/app.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize feather icons
+            if (typeof feather !== 'undefined') { feather.replace(); }
+
+            // Auto-refresh the page every 2 minutes for new bookings
+            setTimeout(function(){ location.reload(); }, 120000);
+        });
+    </script>
+</body>
+</html>

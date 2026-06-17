@@ -1,0 +1,70 @@
+{% extends 'Dashboard.html' %}
+{% block content %}
+
+<div class="row justify-content-center mt-4">
+  <div class="col-lg-10 col-md-12">
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+
+        <!-- Title -->
+        <div class="mb-4">
+          <h4 class="card-title mb-1">Add Category</h4>
+          <p class="card-description text-muted">
+            Enter category details
+          </p>
+        </div>
+
+        <form method="POST"
+              action="{% url 'save_category' %}"
+              enctype="multipart/form-data">
+
+          {% csrf_token %}
+
+          <!-- Category Name -->
+          <div class="form-group mb-3">
+            <label class="form-label">Category Name</label>
+            <input type="text"
+                   name="category_name"
+                   class="form-control"
+                   placeholder="Eg: Breakfast, Lunch"
+                   required>
+          </div>
+
+          <!-- Category Image -->
+          <div class="form-group mb-3">
+            <label class="form-label">Category Image</label>
+            <input type="file"
+                   name="category_image"
+                   class="form-control">
+          </div>
+
+          <!-- Description -->
+          <div class="form-group mb-4">
+            <label class="form-label">Description</label>
+            <textarea name="description"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Category description"></textarea>
+          </div>
+
+          <!-- Buttons -->
+          <div class="d-flex justify-content-start">
+            <button type="submit" class="btn btn-primary me-2">
+              Save Category
+            </button>
+
+            <a href="{% url 'view_category' %}" class="btn btn-light">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

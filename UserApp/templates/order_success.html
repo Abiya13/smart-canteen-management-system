@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Order Success | Smart Canteen</title>
+    <link href="{% static 'web/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'web/css/style.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+</head>
+<style>
+    @media print {
+        /* Hide everything except the receipt card */
+        body * { visibility: hidden; }
+        .receipt-card, .receipt-card * { visibility: visible; }
+        .receipt-card {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            box-shadow: none !important;
+            border: none !important;
+        }
+        /* Specifically hide the action buttons inside the card during print */
+        .no-print { display: none !important; }
+    }
+</style>
+<body class="bg-light">
+
+    <div class="container-xxl py-5 bg-dark hero-header mb-5">
+        <div class="container text-center my-5 pt-5 pb-4">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Order Confirmed!</h1>
+        </div>
+    </div>
+
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow p-4 p-md-5 receipt-card">
+                        <div class="text-center mb-4">
+                            <div class="mb-3">
+                                <i class="fa fa-check-circle fa-5x text-success"></i>
+                            </div>
+                            <h1 class="fw-bold text-dark">Payment Received</h1>
+                            <p class="text-muted">Enjoy your meal, {{ request.user.username }}!</p>
+                        </div>
+
+                        <div class="bg-light p-4 rounded-3 text-center mb-4" style="border: 2px dashed #FEA116;">
+                            <span class="text-uppercase text-muted small fw-bold d-block mb-1">Canteen Pickup Token</span>
+                            <h2 class="display-2 text-primary fw-bold mb-0">#{{ checkout.id }}</h2>
+                            <p class="text-muted small mt-2 mb-0">Show this number at the counter to collect your food.</p>
+                        </div>
+
+                        <div class="text-start mb-4">
+                            <h6 class="fw-bold border-bottom pb-2 mb-3"><i class="fa fa-file-invoice me-2"></i>Order Summary</h6>
+                            {% for item in order_items %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">{{ item.food.food_name }} (x{{ item.quantity }})</span>
+                                <span class="text-dark">₹{{ item.total_price }}</span>
+                            </div>
+                            {% endfor %}
+                            <hr>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="fw-bold">Total Paid:</span>
+                                <span class="fw-bold text-success">₹{{ checkout.total_amount }}</span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center no-print">
+                            <a href="{% url 'my_orders' %}" class="btn btn-primary py-3 px-4 flex-grow-1">
+                                <i class="fa fa-list me-2"></i>My Orders
+                            </a>
+                            <button onclick="window.print()" class="btn btn-dark py-3 px-4">
+                                <i class="fa fa-print"></i> Print Receipt
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4 no-print">
+                            <a href="{% url 'user_home' %}" class="text-primary fw-bold text-decoration-none">
+                                <i class="fa fa-arrow-left me-2"></i>Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    // This will open the print dialog automatically when the receipt page loads
+    window.onload = function() {
+        // Optional: wait 1 second so the user sees the "Success" animation first
+        setTimeout(function() {
+            window.print();
+        }, 500);
+    };
+</script>
+
+</body>
+</html>

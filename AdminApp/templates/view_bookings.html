@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Reservations - Smart Canteen</title>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="shortcut icon" href="{% static 'assets/img/icons/icon-48x48.png' %}" />
+    <link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .badge { font-weight: 500; }
+        .btn-success { color: #fff; background-color: #28a745; border-color: #28a745; }
+        .gap-2 { gap: 0.5rem !important; }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar" class="sidebar js-sidebar">
+            <div class="sidebar-content js-simplebar">
+                <a class="sidebar-brand text-decoration-none" href="{% url 'admin_dashboard' %}">
+                    <span class="align-middle">Smart Canteen</span>
+                </a>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'admin_dashboard' %}">
+                            <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'live_orders' %}">
+                            <i class="align-middle" data-feather="play-circle"></i> <span class="align-middle">Live Orders</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item active">
+                        <a class="sidebar-link" href="{% url 'view_bookings' %}">
+                            <i class="align-middle" data-feather="calendar"></i> <span class="align-middle">Reservations</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'view_feedback' %}">
+                            <i class="align-middle" data-feather="message-square"></i> <span class="align-middle">Feedback</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="main">
+            <nav class="navbar navbar-expand navbar-light navbar-bg">
+                <a class="sidebar-toggle js-sidebar-toggle">
+                    <i class="hamburger align-self-center"></i>
+                </a>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav navbar-align">
+                        <li class="nav-item me-2">
+                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3" href="{% url 'user_home' %}" target="_blank">
+                                <i class="align-middle me-1" data-feather="external-link"></i> View Site
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
+                                <span class="text-dark">Hi, <strong>{{ request.user.username }}</strong></span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a class="dropdown-item" href="{% url 'user_logout' %}"><i class="align-middle me-1" data-feather="log-out"></i> Log out</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="content">
+                <div class="container-fluid p-0">
+
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <h1 class="h3 d-inline align-middle"><strong>Table</strong> Reservations</h1>
+                        <nav aria-label="breadcrumb">
+                            <div class="breadcrumb bg-transparent p-0 mb-0">
+                                <a href="{% url 'admin_dashboard' %}" class="text-decoration-none text-muted">Dashboard</a>
+                                <span class="text-muted mx-2">/</span>
+                                <span class="text-primary fw-bold">Bookings</span>
+                            </div>
+                        </nav>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <i class="align-middle me-1" data-feather="info"></i> {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-4 col-xxl-3 d-flex">
+                            <div class="card flex-fill shadow-sm border-start border-primary border-4">
+                                <div class="card-body py-4">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h3 class="mb-2">{{ bookings.count }}</h3>
+                                            <p class="mb-0 text-muted">Total Reservations</p>
+                                        </div>
+                                        <div class="stat text-primary">
+                                            <i class="align-middle" data-feather="calendar"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                            <h5 class="card-title mb-0">Incoming Bookings Queue</h5>
+                        </div>
+                        <div class="card-body px-4">
+                            <div class="table-responsive">
+                                <table class="table table-hover my-0">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Customer</th>
+                                            <th>Date & Time</th>
+                                            <th>Guests</th>
+                                            <th class="d-none d-md-table-cell">Requests</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for booking in bookings %}
+                                        <tr>
+                                            <td><span class="text-muted fw-bold">#{{ booking.id }}</span></td>
+                                            <td>
+                                                <div class="fw-bold">{{ booking.name }}</div>
+                                                <div class="text-muted small">{{ booking.email }}</div>
+                                            </td>
+                                            <td>
+                                                <div>{{ booking.date_time|date:"d M Y" }}</div>
+                                                <div class="text-muted small">{{ booking.date_time|time:"H:i" }}</div>
+                                            </td>
+                                            <td><span class="badge bg-light text-dark border rounded-pill px-3">{{ booking.no_of_people }}</span></td>
+                                            <td class="d-none d-md-table-cell text-muted">
+                                                {{ booking.special_request|default:"---" }}
+                                            </td>
+
+                                            <td>
+                                                {% if booking.status == 'Pending' %}
+                                                    <span class="badge bg-secondary">Pending</span>
+                                                {% elif booking.status == 'Confirmed' %}
+                                                    <span class="badge bg-warning text-dark">Confirmed</span>
+                                                {% elif booking.status == 'Completed' %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% elif booking.status == 'Cancelled' %}
+                                                    <span class="badge bg-danger">Cancelled</span>
+                                                {% endif %}
+                                            </td>
+
+                                            <td class="text-end">
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    {% if booking.status == 'Pending' %}
+                                                        <form action="{% url 'update_booking_status' booking.id 'Confirmed' %}" method="POST">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Approve">
+                                                                <i class="align-middle" data-feather="check"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form action="{% url 'update_booking_status' booking.id 'Cancelled' %}" method="POST">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm px-2"
+                                                                    style="border-radius: 6px; transition: 0.2s;"
+                                                                    title="Reject/Cancel">
+                                                                <i class="align-middle me-1" data-feather="x-circle"></i> Cancel
+                                                            </button>
+                                                        </form>
+
+                                                    {% elif booking.status == 'Confirmed' %}
+                                                        <form action="{% url 'update_booking_status' booking.id 'Completed' %}" method="POST">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-sm btn-success" title="Mark as Completed">
+                                                                <i class="align-middle" data-feather="user-check"></i> Finish
+                                                            </button>
+                                                        </form>
+                                                        <form action="{% url 'update_booking_status' booking.id 'Cancelled' %}" method="POST">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancel">
+                                                                <i class="align-middle" data-feather="x"></i>
+                                                            </button>
+                                                        </form>
+
+                                                    {% else %}
+                                                        <span class="text-muted small">Action closed</span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="7" class="text-center py-5 text-muted">No reservations found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <div class="container-fluid text-center">
+                    <p class="mb-0 small text-muted">&copy; 2026 Smart Canteen Admin Panel</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="{% static 'assets/js/app.js' %}"></script>
+</body>
+</html>
